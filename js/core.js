@@ -43,8 +43,8 @@
     return state;
   }
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(state)); }
-    catch (e) { console.error("Could not save progress", e); }
+    try { localStorage.setItem(KEY, JSON.stringify(state)); return true; }
+    catch (e) { console.error("Could not save progress", e); return false; }
   }
   function today() {
     const k = dateKey();
@@ -145,7 +145,7 @@
 
   function allWords() {
     const builtIn = window.VOCAB.map(([fr, en, ex, theme]) => ({ id: fr, fr, en, ex, theme }));
-    return builtIn.concat(state.custom.map((w) => ({ ...w, theme: "Mes mots" })));
+    return builtIn.concat(state.custom.map((w) => ({ ...w, theme: w.deck || "Mes mots", custom: true })));
   }
 
   window.FB = { $, $$, esc, shuffle, dateKey, dayNum, load, save, today, bump, streak, check, norm, stripAccents,

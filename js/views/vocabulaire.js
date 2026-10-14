@@ -105,7 +105,7 @@
         const front = $("#front"), back = $("#back"), actions = $("#actions");
         const backHtml = `
           <div class="answer"><b>${esc(w.fr)}</b> <button class="icon" id="say">🔊</button></div>
-          <div class="en">${esc(w.en)}</div>
+          ${w.back ? `<div class="rich">${w.back}</div>` : `<div class="en">${esc(w.en)}</div>`}
           ${w.ex ? `<p class="example">« ${esc(w.ex)} » <button class="icon" id="say-ex">🔊</button></p>` : ""}`;
 
         const gradeButtons = (suggest) => `
@@ -138,7 +138,8 @@
           next();
         }
 
-        if (mode === "recognize") {
+        // Imported Anki cards carry a full definition rather than a short translation, so they are always shown FR → EN.
+        if (mode === "recognize" || w.back) {
           front.innerHTML = `<div class="prompt-word">${esc(w.fr)} <button class="icon" id="say-front">🔊</button></div>`;
           $("#say-front").onclick = () => speak(w.fr);
           actions.innerHTML = `<button class="btn primary wide" id="flip">Voir la réponse <small>Espace</small></button>`;

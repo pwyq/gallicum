@@ -27,7 +27,7 @@ Then open http://localhost:5173.
 | **Grammaire** | 10 key B1 topics (passé composé/imparfait, y/en, qui/que/dont/où, subjonctif, accord du participe passé, si-clauses…), each with an explanation and a quiz. |
 | **Dictée** | Listen to a sentence and type it, then get a word-by-word correction (accents, agreements, missing words). |
 | **Écrire** | DELF B1-style prompts with a word counter, a proofreading checklist and a journal. *Copier pour correction* copies your text with a correction prompt you can paste into Claude. |
-| **Lexique** | Search every word, see when it's due, and add your own words (they join your reviews). |
+| **Lexique** | Search every word, see when it's due, and add your own words (they join your reviews). You can also **import an Anki deck**: in Anki, *File → Export… → Notes in Plain Text (.txt)*. |
 
 Keyboard: `Entrée` checks/continues, `Espace` flips a card, `1–4` grades a card or picks a quiz answer, `Ctrl+Entrée` checks a dictation.
 
