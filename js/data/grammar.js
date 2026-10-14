@@ -3,7 +3,7 @@ window.GRAMMAR = [
   {
     id: "pc-imp",
     title: "Passé composé ou imparfait ?",
-    level: "A2–B1",
+    level: "A2",
     explain: `
       <p><b>Imparfait</b> → background, description, states, habits, actions in progress.<br>
       <i>Il faisait beau. Quand j'étais petit, je jouais au foot tous les jours.</i></p>
@@ -27,7 +27,7 @@ window.GRAMMAR = [
   {
     id: "cod-coi",
     title: "Pronoms COD et COI (le, la, lui, leur)",
-    level: "A2–B1",
+    level: "A2",
     explain: `
       <p><b>COD</b> (verbe + quelqu'un/quelque chose, sans préposition) → <b>me, te, le, la, l', nous, vous, les</b>.<br>
       <b>COI</b> (verbe + <b>à</b> + personne) → <b>me, te, lui, nous, vous, leur</b>.</p>
@@ -183,7 +183,7 @@ window.GRAMMAR = [
   {
     id: "negation",
     title: "La négation",
-    level: "A2–B1",
+    level: "A2",
     explain: `
       <p><b>ne … pas</b> (not), <b>ne … plus</b> (no longer), <b>ne … jamais</b> (never), <b>ne … rien</b> (nothing), <b>ne … personne</b> (nobody), <b>ne … aucun(e)</b> (no, not any), <b>ne … ni … ni</b> (neither…nor), <b>ne … que</b> (only).</p>
       <p>In the passé composé, <i>pas, plus, jamais, rien</i> go before the participle, but <b>personne</b> goes after: <i>Je n'ai rien vu. Je n'ai vu personne.</i></p>
@@ -204,7 +204,7 @@ window.GRAMMAR = [
   {
     id: "comparaison",
     title: "Comparatif et superlatif",
-    level: "A2–B1",
+    level: "A2",
     explain: `
       <p><b>plus / moins / aussi + adjectif + que</b>: <i>Il est plus grand que moi.</i> With nouns: <b>plus de / moins de / autant de + nom + que</b>. With verbs: <b>plus / moins / autant</b>.</p>
       <p>Irregular: <b>bon → meilleur</b> (adjective), <b>bien → mieux</b> (adverb), <b>mauvais → pire</b> (or plus mauvais).</p>
@@ -221,3 +221,21 @@ window.GRAMMAR = [
     ],
   },
 ];
+
+// Build the full course in teaching order (A1 → A2 → B1) from all grammar files.
+(function () {
+  const all = [...window.GRAMMAR_A1, ...window.GRAMMAR_A2, ...window.GRAMMAR_B1, ...window.GRAMMAR];
+  const ORDER = [
+    // A1
+    "genre-articles", "present-er", "present-irr", "questions", "adjectifs", "possessifs", "prepositions-lieu",
+    // A2
+    "quantites", "toniques", "futur-proche", "pc-formation", "imparfait", "pc-imp", "pronominaux", "imperatif",
+    "negation", "cod-coi", "comparaison", "temps",
+    // B1
+    "y-en", "relatifs", "doubles-pronoms", "si-futur", "subjonctif", "accord-pp", "pqp-indirect", "passif",
+    "gerondif", "pronoms-poss-dem", "connecteurs",
+  ];
+  const byId = new Map(all.map((t) => [t.id, t]));
+  window.GRAMMAR = ORDER.map((id) => byId.get(id)).concat(all.filter((t) => !ORDER.includes(t.id)));
+  window.GRAMMAR_LEVELS = ["A1", "A2", "B1"];
+})();

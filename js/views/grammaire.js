@@ -1,102 +1,208 @@
-// Grammar topics: short explanation + multiple-choice quiz with explanations.
+// Grammar course A1 → B1: lessons (notes + quiz), placement tests per level, printable notes.
 Views.grammaire = function (root, [topicId]) {
-  const { $, $$, esc, shuffle, bump, save } = FB;
+  const { $, $$, esc, shuffle, bump, save, check, accentBar } = FB;
   const state = FB.state;
-  const topic = window.GRAMMAR.find((g) => g.id === topicId);
+  const LEVELS = window.GRAMMAR_LEVELS;
+  const TEST_SIZE = 20;
 
   const blank = (q) => esc(q).replace("___", '<span class="blank">_____</span>');
+  const answerOf = (q) => (q.t ? q.t[0] : q.c[q.a]);
+  // "autant d'" + " argent" → "autant d'argent"
+  const filled = (q) => {
+    const a = answerOf(q);
+    return esc(q.q).replace(a.endsWith("'") ? /___ ?/ : "___", `<b>${esc(a)}</b>`);
+  };
+  const best = (g) => (state.grammar[g.id] ? state.grammar[g.id].best : null);
+  const nextLesson = () => window.GRAMMAR.find((g) => (best(g) ?? 0) < 0.8);
 
-  if (!topic) {
+  // ---------- Course overview ----------
+  function index() {
+    App.onKey = null;
+    const next = nextLesson();
     root.innerHTML = `
       <h1>Grammaire</h1>
-      <p class="muted">Les points clés du niveau B1. Lisez l'explication, puis faites le quiz.</p>
-      <div class="topics">${window.GRAMMAR.map((g) => {
-        const s = state.grammar[g.id];
-        const pct = s ? Math.round(s.best * 100) : null;
-        return `<a class="card topic" href="#/grammaire/${g.id}">
-          <div class="row between"><span class="tag">${g.level}</span>${pct != null ? `<b class="${pct >= 80 ? "ok" : pct >= 50 ? "accent" : "wrong"}">${pct}%</b>` : '<span class="muted small">pas encore fait</span>'}</div>
-          <h3>${esc(g.title)}</h3>
-          <div class="track"><div style="width:${pct || 0}%"></div></div>
-        </a>`;
-      }).join("")}</div>`;
-    return;
+      <p class="muted">Un cours complet de A1 à B1 : chaque leçon a une fiche (règles, tableaux, exemples) et des exercices. Une leçon est « acquise » à 80 %.</p>
+      <section class="card">
+        <div class="row wrap between">
+          <div>
+            ${next ? `<div class="muted small">Prochaine leçon</div><a class="lead" href="#/grammaire/${next.id}"><b>${esc(next.title)}</b></a> <span class="tag">${next.level}</span>`
+              : `<b>Bravo, tout le cours est acquis ! 🎉</b>`}
+          </div>
+          <a class="btn" href="#/grammaire/fiches">📄 Toutes les fiches</a>
+        </div>
+        <hr>
+        <div class="muted small">Pas sûr de ce que vous avez oublié ? Faites un test de niveau (${TEST_SIZE} questions mélangées) :</div>
+        <div class="row wrap">${LEVELS.map((l) => `<a class="btn" href="#/grammaire/test-${l}">Test ${l}</a>`).join("")}</div>
+      </section>
+      ${LEVELS.map((l) => {
+        const topics = window.GRAMMAR.filter((g) => g.level === l);
+        const done = topics.filter((g) => (best(g) ?? 0) >= 0.8).length;
+        return `
+          <h2 class="level-head">${l} <span class="muted small">${done} / ${topics.length} leçons acquises</span></h2>
+          <div class="topics">${topics.map((g) => {
+            const b = best(g);
+            const pct = b != null ? Math.round(b * 100) : null;
+            const n = window.GRAMMAR.indexOf(g) + 1;
+            return `<a class="card topic ${g === next ? "next" : ""}" href="#/grammaire/${g.id}">
+              <div class="row between"><span class="muted small">Leçon ${n}</span>${pct != null ? `<b class="${pct >= 80 ? "ok" : pct >= 50 ? "accent" : "wrong"}">${pct}%</b>` : '<span class="muted small">à faire</span>'}</div>
+              <h3>${esc(g.title)}</h3>
+              <div class="track"><div style="width:${pct || 0}%"></div></div>
+            </a>`;
+          }).join("")}</div>`;
+      }).join("")}`;
   }
 
-  function intro() {
+  // ---------- All notes (printable) ----------
+  function sheets() {
     App.onKey = null;
     root.innerHTML = `
-      <p><a href="#/grammaire">← Tous les thèmes</a></p>
-      <h1>${esc(topic.title)}</h1>
-      <section class="card explain">${topic.explain}</section>
-      <button class="btn primary" id="start">Commencer le quiz (${topic.questions.length} questions)</button>`;
-    $("#start").onclick = quiz;
-    App.onKey = (e) => { if (e.key === "Enter") { e.preventDefault(); quiz(); } };
+      <p class="no-print"><a href="#/grammaire">← Grammaire</a></p>
+      <div class="row between"><h1>Fiches de grammaire A1 → B1</h1><button class="btn no-print" id="print">🖨 Imprimer / PDF</button></div>
+      <nav class="toc card">${LEVELS.map((l) => `<div><b>${l}</b><ol start="${window.GRAMMAR.findIndex((g) => g.level === l) + 1}">${window.GRAMMAR.filter((g) => g.level === l)
+        .map((g) => `<li><a href="#/grammaire/${g.id}">${esc(g.title)}</a></li>`).join("")}</ol></div>`).join("")}</nav>
+      ${window.GRAMMAR.map((g, i) => `
+        <section class="card explain sheet">
+          <h2>${i + 1}. ${esc(g.title)} <span class="tag">${g.level}</span></h2>
+          ${g.explain}
+          <p class="example small">Ex. : ${g.questions.slice(0, 2).map(filled).join(" · ")}</p>
+        </section>`).join("")}`;
+    $("#print").onclick = () => window.print();
   }
 
-  function quiz() {
-    const qs = shuffle(topic.questions);
+  // ---------- Lesson page ----------
+  function lesson(topic) {
+    App.onKey = null;
+    const i = window.GRAMMAR.indexOf(topic);
+    const prev = window.GRAMMAR[i - 1], next = window.GRAMMAR[i + 1];
+    root.innerHTML = `
+      <p><a href="#/grammaire">← Grammaire</a></p>
+      <div class="muted small">Leçon ${i + 1} · ${topic.level}</div>
+      <h1>${esc(topic.title)}</h1>
+      <section class="card explain">${topic.explain}</section>
+      <button class="btn primary" id="start">Exercices (${topic.questions.length}) <small>Entrée</small></button>
+      <div class="row between lesson-nav">
+        ${prev ? `<a href="#/grammaire/${prev.id}">← ${esc(prev.title)}</a>` : "<span></span>"}
+        ${next ? `<a href="#/grammaire/${next.id}">${esc(next.title)} →</a>` : "<span></span>"}
+      </div>`;
+    const start = () => quiz(shuffle(topic.questions).map((q) => ({ q, topic })), { title: topic.title, back: () => lesson(topic), topic });
+    $("#start").onclick = start;
+    App.onKey = (e) => { if (e.key === "Enter") { e.preventDefault(); start(); } };
+  }
+
+  // ---------- Placement test ----------
+  function levelTest(level) {
+    const topics = window.GRAMMAR.filter((g) => g.level === level);
+    // Spread questions across every lesson of the level.
+    const perTopic = Math.max(1, Math.ceil(TEST_SIZE / topics.length));
+    const items = shuffle(topics.flatMap((t) => shuffle(t.questions).slice(0, perTopic).map((q) => ({ q, topic: t })))).slice(0, TEST_SIZE);
+    quiz(items, { title: `Test de niveau ${level}`, back: index, level });
+  }
+
+  // ---------- Quiz (lesson or test) ----------
+  function quiz(items, opts) {
     let n = 0, score = 0;
     const wrong = [];
 
     function ask() {
-      if (n === qs.length) return done();
-      const q = qs[n];
-      const choices = shuffle(q.c.map((text, i) => ({ text, right: i === q.a })));
+      if (n === items.length) return done();
+      const { q, topic } = items[n];
+      const typed = !!q.t;
+      const choices = typed ? [] : shuffle(q.c.map((text, i) => ({ text, right: i === q.a })));
       root.innerHTML = `
-        <p><a href="#/grammaire/${topic.id}">← ${esc(topic.title)}</a></p>
-        <div class="progress"><div style="width:${(n / qs.length) * 100}%"></div></div>
+        <p><a href="#/grammaire${opts.topic ? "/" + opts.topic.id : ""}">← ${esc(opts.title)}</a></p>
+        <div class="progress"><div style="width:${(n / items.length) * 100}%"></div></div>
         <section class="card flash">
-          <div class="meta"><span class="muted small">${n + 1} / ${qs.length}</span></div>
+          <div class="meta">${opts.level ? `<span class="tag">${esc(topic.title)}</span>` : ""}<span class="muted small">${n + 1} / ${items.length}</span></div>
           <p class="question">${blank(q.q)}</p>
-          <div class="choices">${choices.map((c, i) => `<button class="btn choice" data-i="${i}"><small>${i + 1}</small> ${esc(c.text)}</button>`).join("")}</div>
+          ${typed ? `
+            <form id="f" class="answer-form" autocomplete="off">
+              <input id="ans" placeholder="Votre réponse…" autocapitalize="off" spellcheck="false">
+              <button class="btn primary">Vérifier</button>
+            </form>
+            ${accentBar("ans")}`
+          : `<div class="choices">${choices.map((c, i) => `<button class="btn choice" data-i="${i}"><small>${i + 1}</small> ${esc(c.text)}</button>`).join("")}</div>`}
           <div id="fb"></div>
         </section>`;
 
       let answered = false;
-      function choose(i) {
-        if (answered || !choices[i]) return;
+      function feedback(result) {
         answered = true;
-        const ok = choices[i].right;
-        if (ok) score++; else wrong.push(q);
+        if (result === "ok") score++;
+        else if (result === "accent") score += 0.5;
+        if (result !== "ok") wrong.push({ q, topic });
+        const s = (state.grammar[topic.id] ||= { ok: 0, ko: 0, best: 0 });
+        if (result === "ok") s.ok++; else s.ko++;
         bump("grammar");
-        $$(".choice").forEach((b, j) => {
-          b.disabled = true;
-          if (choices[j].right) b.classList.add("ok");
-          else if (j === i) b.classList.add("wrong");
-        });
-        const filled = esc(q.q).replace("___", `<b>${esc(choices.find((c) => c.right).text)}</b>`);
+        const head = { ok: "✓ Correct !", accent: "≈ Presque — attention aux accents.", wrong: "✗ Non." }[result];
         $("#fb").innerHTML = `
-          <p class="${ok ? "ok" : "wrong"}">${ok ? "✓ Correct !" : "✗ Non."} ${esc(q.why)}</p>
-          ${q.q.includes("___") ? `<p class="example">${filled}</p>` : ""}
+          <p class="${result}">${head} ${esc(q.why)}</p>
+          ${q.q.includes("___") ? `<p class="example">${filled(q)}</p>` : typed ? `<p class="example">Réponse : <b>${esc(answerOf(q))}</b></p>` : ""}
           <button class="btn primary" id="next">Suivant <small>Entrée</small></button>`;
         $("#next").onclick = () => { n++; ask(); };
-        App.onKey = (e) => { if (e.key === "Enter") { e.preventDefault(); n++; ask(); } };
+        setTimeout(() => (App.onKey = (e) => { if (e.key === "Enter") { e.preventDefault(); n++; ask(); } }), 0);
       }
-      $$(".choice").forEach((b) => (b.onclick = () => choose(+b.dataset.i)));
-      App.onKey = (e) => { const k = +e.key; if (k >= 1 && k <= choices.length) choose(k - 1); };
+
+      if (typed) {
+        const input = $("#ans");
+        input.focus();
+        App.onKey = null;
+        $("#f").onsubmit = (e) => {
+          e.preventDefault();
+          if (answered) return;
+          const r = check(input.value, q.t);
+          input.disabled = true;
+          input.classList.add(r);
+          feedback(r);
+        };
+      } else {
+        const choose = (i) => {
+          if (answered || !choices[i]) return;
+          $$(".choice").forEach((b, j) => {
+            b.disabled = true;
+            if (choices[j].right) b.classList.add("ok");
+            else if (j === i) b.classList.add("wrong");
+          });
+          feedback(choices[i].right ? "ok" : "wrong");
+        };
+        $$(".choice").forEach((b) => (b.onclick = () => choose(+b.dataset.i)));
+        App.onKey = (e) => { const k = +e.key; if (k >= 1 && k <= choices.length) choose(k - 1); };
+      }
     }
 
     function done() {
       App.onKey = null;
-      const pct = score / qs.length;
-      const s = (state.grammar[topic.id] ||= { ok: 0, ko: 0, best: 0 });
-      s.ok += score; s.ko += qs.length - score; s.best = Math.max(s.best, pct);
+      const pct = score / items.length;
+      if (opts.topic) {
+        const s = state.grammar[opts.topic.id];
+        s.best = Math.max(s.best, pct);
+      }
       save();
+      // For a placement test, list the lessons where mistakes were made.
+      const weakTopics = [...new Set(wrong.map((w) => w.topic))];
       root.innerHTML = `
-        <p><a href="#/grammaire">← Tous les thèmes</a></p>
+        <p><a href="#/grammaire">← Grammaire</a></p>
         <section class="card center">
-          <h2>${esc(topic.title)}</h2>
-          <p class="lead">${score} / ${qs.length} ${pct >= 0.8 ? "🌟" : pct >= 0.5 ? "💪" : "📚"}</p>
-          ${wrong.length ? `<div class="left"><h3>À revoir</h3><ul>${wrong.map((q) =>
-            `<li>${esc(q.q).replace("___", `<b>${esc(q.c[q.a])}</b>`)} <span class="muted small">— ${esc(q.why)}</span></li>`).join("")}</ul></div>` : ""}
-          <button class="btn primary" id="again">Recommencer</button> <button class="btn" id="rule">Relire la règle</button>
+          <h2>${esc(opts.title)}</h2>
+          <p class="lead">${score} / ${items.length} ${pct >= 0.8 ? "🌟" : pct >= 0.5 ? "💪" : "📚"}</p>
+          ${opts.level && weakTopics.length ? `<div class="left"><h3>Leçons à revoir</h3><ul>${weakTopics.map((t) =>
+            `<li><a href="#/grammaire/${t.id}">${esc(t.title)}</a></li>`).join("")}</ul></div>` : ""}
+          ${wrong.length ? `<div class="left"><h3>Corrections</h3><ul>${wrong.map(({ q }) =>
+            `<li>${filled(q)} <span class="muted small">— ${esc(q.why)}</span></li>`).join("")}</ul></div>` : ""}
+          <button class="btn primary" id="again">Recommencer</button> <button class="btn" id="back">${opts.topic ? "Relire la leçon" : "Retour au cours"}</button>
+          ${opts.topic && pct >= 0.8 && window.GRAMMAR[window.GRAMMAR.indexOf(opts.topic) + 1]
+            ? `<a class="btn" href="#/grammaire/${window.GRAMMAR[window.GRAMMAR.indexOf(opts.topic) + 1].id}">Leçon suivante →</a>` : ""}
         </section>`;
-      $("#again").onclick = quiz;
-      $("#rule").onclick = intro;
+      $("#again").onclick = () => (opts.level ? levelTest(opts.level) : quiz(shuffle(items), opts));
+      $("#back").onclick = opts.back;
     }
 
     ask();
   }
 
-  intro();
+  // ---------- Routing ----------
+  if (topicId === "fiches") return sheets();
+  if (topicId && topicId.startsWith("test-") && LEVELS.includes(topicId.slice(5))) return levelTest(topicId.slice(5));
+  const topic = window.GRAMMAR.find((g) => g.id === topicId);
+  if (topic) return lesson(topic);
+  index();
 };

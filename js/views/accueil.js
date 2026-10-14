@@ -63,12 +63,16 @@ Views.accueil = function (root) {
         <div class="bars">${days.map((d) => `<div class="bar" title="${d.total}"><span style="height:${Math.round((d.total / max) * 100)}%"></span><em>${d.label}</em></div>`).join("")}</div>
       </section>
       <section class="card">
-        <h2>Grammaire</h2>
-        ${window.GRAMMAR.map((g) => {
-          const s = state.grammar[g.id];
-          const pct = s ? Math.round(s.best * 100) : 0;
-          return `<a class="meter" href="#/grammaire/${g.id}"><span>${esc(g.title)}</span><div class="track"><div style="width:${pct}%"></div></div><b>${s ? pct + "%" : "–"}</b></a>`;
+        <h2>Cours de grammaire</h2>
+        ${window.GRAMMAR_LEVELS.map((l) => {
+          const topics = window.GRAMMAR.filter((g) => g.level === l);
+          const done = topics.filter((g) => state.grammar[g.id] && state.grammar[g.id].best >= 0.8).length;
+          return `<a class="meter" href="#/grammaire"><span>Niveau ${l}</span><div class="track"><div style="width:${Math.round((done / topics.length) * 100)}%"></div></div><b>${done}/${topics.length}</b></a>`;
         }).join("")}
+        ${(() => {
+          const next = window.GRAMMAR.find((g) => !(state.grammar[g.id] && state.grammar[g.id].best >= 0.8));
+          return next ? `<p class="small">Prochaine leçon : <a href="#/grammaire/${next.id}">${esc(next.title)}</a></p>` : "";
+        })()}
       </section>
     </div>
 
