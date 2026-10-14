@@ -121,19 +121,22 @@ Views.grammaire = function (root, [topicId]) {
             </form>
             ${accentBar("ans")}`
           : `<div class="choices">${choices.map((c, i) => `<button class="btn choice" data-i="${i}"><small>${i + 1}</small> ${esc(c.text)}</button>`).join("")}</div>`}
+          <p><button class="btn ghost" id="idk">🤷 Je ne sais pas <small>Échap</small></button></p>
           <div id="fb"></div>
         </section>`;
 
       let answered = false;
-      function feedback(result) {
+      // result: "ok" | "accent" | "wrong" | "idk"; given = what the learner answered (null for "je ne sais pas")
+      function feedback(result, given) {
         answered = true;
+        $("#idk").remove();
         if (result === "ok") score++;
         else if (result === "accent") score += 0.5;
-        if (result !== "ok") wrong.push({ q, topic });
+        if (result !== "ok") wrong.push({ q, topic, given, result });
         const s = (state.grammar[topic.id] ||= { ok: 0, ko: 0, best: 0 });
         if (result === "ok") s.ok++; else s.ko++;
         bump("grammar");
-        const head = { ok: "✓ Correct !", accent: "≈ Presque — attention aux accents.", wrong: "✗ Non." }[result];
+        const head = { ok: "✓ Correct !", accent: "≈ Presque — attention aux accents.", wrong: "✗ Non.", idk: "💡 Voici la réponse." }[result];
         $("#fb").innerHTML = `
           <p class="${result}">${head} ${esc(q.why)}</p>
           ${q.q.includes("___") ? `<p class="example">${filled(q)}</p>` : typed ? `<p class="example">Réponse : <b>${esc(answerOf(q))}</b></p>` : ""}
@@ -152,27 +155,35 @@ Views.grammaire = function (root, [topicId]) {
           const r = check(input.value, q.t);
           input.disabled = true;
           input.classList.add(r);
-          feedback(r);
+          feedback(r, input.value.trim() || null);
         };
+        $("#idk").onclick = () => { if (answered) return; input.disabled = true; feedback("idk", null); };
+        App.onKey = (e) => { if (e.key === "Escape" && !answered) { e.preventDefault(); $("#idk").click(); } };
       } else {
+        const reveal = (picked) => $$(".choice").forEach((b, j) => {
+          b.disabled = true;
+          if (choices[j].right) b.classList.add("ok");
+          else if (j === picked) b.classList.add("wrong");
+        });
         const choose = (i) => {
           if (answered || !choices[i]) return;
-          $$(".choice").forEach((b, j) => {
-            b.disabled = true;
-            if (choices[j].right) b.classList.add("ok");
-            else if (j === i) b.classList.add("wrong");
-          });
-          feedback(choices[i].right ? "ok" : "wrong");
+          reveal(i);
+          feedback(choices[i].right ? "ok" : "wrong", choices[i].text);
         };
         $$(".choice").forEach((b) => (b.onclick = () => choose(+b.dataset.i)));
-        App.onKey = (e) => { const k = +e.key; if (k >= 1 && k <= choices.length) choose(k - 1); };
+        $("#idk").onclick = () => { if (answered) return; reveal(-1); feedback("idk", null); };
+        App.onKey = (e) => {
+          if (e.key === "Escape") { e.preventDefault(); $("#idk")?.click(); return; }
+          const k = +e.key;
+          if (k >= 1 && k <= choices.length) choose(k - 1);
+        };
       }
     }
 
     function done() {
       App.onKey = null;
       const pct = score / items.length;
-      if (opts.topic) {
+      if (opts.topic && !opts.retry) {
         const s = state.grammar[opts.topic.id];
         s.best = Math.max(s.best, pct);
       }
@@ -186,13 +197,22 @@ Views.grammaire = function (root, [topicId]) {
           <p class="lead">${score} / ${items.length} ${pct >= 0.8 ? "🌟" : pct >= 0.5 ? "💪" : "📚"}</p>
           ${opts.level && weakTopics.length ? `<div class="left"><h3>Leçons à revoir</h3><ul>${weakTopics.map((t) =>
             `<li><a href="#/grammaire/${t.id}">${esc(t.title)}</a></li>`).join("")}</ul></div>` : ""}
-          ${wrong.length ? `<div class="left"><h3>Corrections</h3><ul>${wrong.map(({ q }) =>
-            `<li>${filled(q)} <span class="muted small">— ${esc(q.why)}</span></li>`).join("")}</ul></div>` : ""}
-          <button class="btn primary" id="again">Recommencer</button> <button class="btn" id="back">${opts.topic ? "Relire la leçon" : "Retour au cours"}</button>
+          ${wrong.length ? `<div class="left"><h3>Explications (${wrong.length})</h3>${wrong.map(({ q, topic, given, result }) => `
+            <div class="correction">
+              <p class="question-small">${filled(q)}</p>
+              <p class="small">${result === "idk" ? `<span class="muted">Vous ne saviez pas.</span>`
+                : `Votre réponse : <s class="wrong">${esc(given || "—")}</s>${result === "accent" ? ' <span class="accent">(accents)</span>' : ""}`}
+                · Bonne réponse : <b class="ok">${esc(answerOf(q))}</b></p>
+              <p class="small">💡 ${esc(q.why)}</p>
+              ${opts.level ? `<p class="small"><a href="#/grammaire/${topic.id}">Revoir la leçon « ${esc(topic.title)} »</a></p>` : ""}
+            </div>`).join("")}</div>` : ""}
+          ${wrong.length ? `<button class="btn primary" id="retry">Refaire mes erreurs (${wrong.length})</button>` : ""}
+          <button class="btn ${wrong.length ? "" : "primary"}" id="again">Recommencer</button> <button class="btn" id="back">${opts.topic ? "Relire la leçon" : "Retour au cours"}</button>
           ${opts.topic && pct >= 0.8 && window.GRAMMAR[window.GRAMMAR.indexOf(opts.topic) + 1]
             ? `<a class="btn" href="#/grammaire/${window.GRAMMAR[window.GRAMMAR.indexOf(opts.topic) + 1].id}">Leçon suivante →</a>` : ""}
         </section>`;
       $("#again").onclick = () => (opts.level ? levelTest(opts.level) : quiz(shuffle(items), opts));
+      if ($("#retry")) $("#retry").onclick = () => quiz(shuffle(wrong.map(({ q, topic }) => ({ q, topic }))), { ...opts, title: opts.title + " — erreurs", retry: true });
       $("#back").onclick = opts.back;
     }
 

@@ -251,3 +251,7 @@ hr { border: 0; border-top: 1px solid var(--border); margin: 1rem 0; }
   main { padding: 0; max-width: none; }
   .card { box-shadow: none; break-inside: avoid; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; padding: .6rem 0; }
 }
+.btn.ghost { border-style: dashed; color: var(--muted); font-size: .92rem; }
+.correction { border-left: 3px solid var(--wrong); padding: .5rem .9rem; margin: .7rem 0; background: var(--bg); border-radius: 0 8px 8px 0; }
+.correction p { margin: .2rem 0; }
+.question-small { font-size: 1.05rem; }
