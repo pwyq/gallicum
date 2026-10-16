@@ -21,6 +21,7 @@
     version: 1,
     settings: { newPerDay: 15, autoPlay: true, rate: 0.95, voice: "", tenses: ["present", "pc", "imparfait", "futur"], verbGroup: "all", dictLevel: "all" },
     cards: {},      // id -> { due, interval, ease, reps, lapses }
+    flagged: {},    // id -> true: words the learner marked as hard by hand
     custom: [],     // user-added words
     conj: {},       // "inf|tense" -> { ok, ko }
     grammar: {},    // topicId -> { ok, ko, best }
@@ -148,6 +149,14 @@
     return builtIn.concat(state.custom.map((w) => ({ ...w, theme: w.deck || "Mes mots", custom: true })));
   }
 
+  // ---------- Hard words ----------
+  // A word is hard once it has been forgotten HARD_LAPSES times, or when flagged by hand.
+  const HARD_LAPSES = 3;
+  const isHard = (id) => !!state.flagged[id] || (state.cards[id]?.lapses || 0) >= HARD_LAPSES;
+  const hardWords = () => allWords().filter((w) => isHard(w.id));
+  // Memory aids (js/data/memory-aids.js) are keyed by the French text, so they also match imported words.
+  const aidFor = (w) => (window.MEMORY_AIDS || {})[w.fr] || null;
+
   window.FB = { $, $$, esc, shuffle, dateKey, dayNum, load, save, today, bump, streak, check, norm, stripAccents,
-    speak, loadVoices, accentBar, review, allWords, get state() { return state; }, set state(s) { state = s; save(); }, defaults };
+    speak, loadVoices, accentBar, review, allWords, isHard, hardWords, aidFor, HARD_LAPSES, get state() { return state; }, set state(s) { state = s; save(); }, defaults };
 })();

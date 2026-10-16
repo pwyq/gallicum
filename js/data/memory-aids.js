@@ -1,0 +1,346 @@
+// Memory aids for hard words, keyed by the exact French text of the card (built-in, Lexique or Anki).
+// Shown on the back of a card after a miss, or whenever the word is "hard" (forgotten 3+ times or flagged).
+// Every field is optional; *mot* renders in italics, **word** in bold.
+//   emoji    – a quick picture
+//   parts    – how the word breaks apart / where it comes from (real etymology only)
+//   bridge   – a link to an English word
+//   family   – related words
+//   hook     – a mnemonic (sound-alike, image); it does not need to be true, just memorable
+//   phrases  – common collocations
+//   examples – extra sentences, [français, english]
+//   confuse  – what it gets mixed up with, and how to tell them apart
+window.MEMORY_AIDS = {
+  "l'entretien d'embauche": {
+    emoji: "🤝💼",
+    parts: "*entretien* = *entre* (between) + *tenir* (to hold): words held between two people → a conversation. *embauche* = *em-* (into) + old *bauche* (workshop): taking someone into the workshop → hiring.",
+    bridge: "*entretenir* has the same roots as English **entertain** (inter + tenere): keeping a conversation going.",
+    family: ["*embaucher* — to hire", "*débaucher* — to lay off; to poach a worker", "*l'entretien de la voiture* — car maintenance", "*entretenir* — to maintain, to keep up"],
+    hook: "« em-BOSH » → the **boss** brings you on board.",
+    phrases: ["passer un entretien d'embauche", "décrocher un entretien", "se préparer à un entretien"],
+    examples: [["Elle a décroché trois entretiens d'embauche cette semaine.", "She landed three job interviews this week."], ["L'entretien s'est bien passé, ils vont m'embaucher !", "The interview went well, they're going to hire me!"]],
+    confuse: "*la réunion* = a meeting with colleagues; *l'entretien* = a one-to-one interview (also used for a press interview).",
+  },
+  "embaucher": {
+    emoji: "✍️",
+    parts: "*em-* (into) + old *bauche* (workshop) → to take someone into the workshop.",
+    family: ["*l'embauche* — hiring", "*débaucher* — to lay off / lure a worker away", "*la débauche* — debauchery (luring away from work… and virtue)"],
+    hook: "« em-BOSH » → the **boss** brings you on.",
+    phrases: ["embaucher quelqu'un", "se faire embaucher", "une offre d'embauche"],
+    confuse: "Opposite: *licencier* (to dismiss) and *démissionner* (to quit — you leave yourself).",
+  },
+  "l'embouteillage": {
+    emoji: "🍾🚗🚗🚗",
+    parts: "*bouteille* (bottle) → *embouteiller* (to bottle) → cars squeezed into the neck of a bottle.",
+    bridge: "English **bottleneck** uses the very same image.",
+    family: ["*la bouteille* — bottle", "*embouteillé(e)* — jammed (*une rue embouteillée*)", "synonym: *le bouchon* (cork!) — same bottle picture"],
+    phrases: ["être coincé dans un embouteillage", "il y a des bouchons sur le périphérique"],
+  },
+  "se débrouiller": {
+    emoji: "🧶",
+    parts: "*dé-* (un-) + *brouiller* (to scramble, to mix up) → to unscramble yourself, to get out of a tangle.",
+    family: ["*des œufs brouillés* — scrambled eggs", "*le brouillard* — fog", "*le brouillon* — rough draft", "*débrouillard(e)* — resourceful"],
+    hook: "Picture your life as a tangled ball of wool: *se débrouiller* = untangle it on your own.",
+    phrases: ["se débrouiller tout seul", "Débrouille-toi !", "je me débrouille en français"],
+  },
+  "le délai": {
+    emoji: "⏳",
+    parts: "Same root as English **delay**, but it means the time you are *allowed*, not the time you lose.",
+    phrases: ["dans les délais — on time, within the deadline", "dans un délai de trois jours — within three days", "un délai de livraison — delivery time"],
+    confuse: "A delay (being late) = *le retard*. *Le délai* = deadline / time allowed. False friend!",
+  },
+  "l'escale": {
+    emoji: "🪜⚓",
+    parts: "From Italian *scala* (ladder, steps): the steps put down to get off a ship → a port of call.",
+    bridge: "English **scale** (to climb) and **escalator** share the root.",
+    phrases: ["faire escale à Dubaï", "un vol sans escale — a non-stop flight"],
+  },
+  "l'ordonnance": {
+    emoji: "📝💊",
+    parts: "*ordonner* (to order) → the doctor's written orders.",
+    bridge: "English **ordinance** (an official order).",
+    phrases: ["délivré sur ordonnance — prescription-only", "le médecin m'a fait une ordonnance"],
+    confuse: "*la prescription* exists but is formal; in daily life you hand *une ordonnance* to the pharmacist.",
+  },
+  "guérir": {
+    emoji: "🩹",
+    parts: "From Frankish *warjan* (to protect). Germanic **w** often became French **gu**: *guerre* = war, *garder* = ward/guard, *Guillaume* = William.",
+    bridge: "gu → w: *guérir* ≈ « wérir » → to **ward** off the illness.",
+    family: ["*la guérison* — recovery", "*guéri(e)* — cured", "*inguérissable* — incurable"],
+    phrases: ["guérir d'une maladie", "je suis complètement guéri(e)"],
+  },
+  "avoir hâte de": {
+    emoji: "⏩",
+    parts: "*la hâte* = **haste** (same Germanic root). *J'ai hâte* = I'm in a hurry for it to come.",
+    family: ["*se hâter* — to hurry", "*à la hâte* — hastily"],
+    phrases: ["J'ai hâte de te voir !", "J'ai hâte que tu viennes (+ subjonctif)"],
+  },
+  "têtu(e)": {
+    emoji: "🐐",
+    parts: "*la tête* (head) + *-u* → « headed », like English **headstrong** / **pig-headed**.",
+    phrases: ["têtu comme une mule — stubborn as a mule"],
+  },
+  "soulagé(e)": {
+    emoji: "😮‍💨",
+    parts: "Latin *sub-* (from under) + *levis* (light) → lifted from below, made lighter.",
+    bridge: "Same *levis* as English **alleviate** and **levitate**.",
+    family: ["*soulager* — to relieve", "*le soulagement* — relief", "*léger / légère* — light"],
+    phrases: ["Quel soulagement !", "je suis soulagé(e) que tu sois là"],
+  },
+  "avoir le cafard": {
+    emoji: "🪳",
+    parts: "*le cafard* = cockroach: something small and dark creeping around in your head.",
+    hook: "Gloomy thoughts scuttle like cockroaches in the dark.",
+    phrases: ["j'ai un peu le cafard ce soir", "ça me donne le cafard — it gets me down"],
+  },
+  "un inconvénient": {
+    emoji: "⚖️",
+    parts: "*in-* (not) + *convénient* (convenient, from *convenir* to suit) → what doesn't suit you.",
+    bridge: "English **inconvenience**.",
+    phrases: ["les avantages et les inconvénients", "si vous n'y voyez pas d'inconvénient — if you don't mind"],
+  },
+  "la grève": {
+    emoji: "🪧",
+    parts: "*la grève* is also a sandy riverbank. Unemployed workers used to gather on Paris's Place de Grève, by the Seine, to wait for work → *faire grève*.",
+    family: ["*le/la gréviste* — striker", "*être en grève* — to be on strike"],
+    phrases: ["faire grève", "une grève des transports", "à cause de la grève"],
+  },
+  "pourtant": {
+    emoji: "🤷",
+    parts: "*pour* + *tant* = « for all that » — word for word the English **for all that**.",
+    examples: [["Il est riche, et pourtant il n'est pas heureux.", "He's rich, and yet he's not happy."]],
+    confuse: "*cependant* (however) is close but more formal; *pourtant* adds surprise: “and yet!”.",
+  },
+  "d'ailleurs": {
+    emoji: "➕",
+    parts: "*d'* + *ailleurs* (elsewhere) → an extra argument brought in from elsewhere.",
+    examples: [["Je n'ai pas envie de sortir. D'ailleurs, il pleut.", "I don't feel like going out. Besides, it's raining."]],
+    confuse: "*ailleurs* alone = elsewhere (*allons ailleurs*). With *d'* it becomes “besides”.",
+  },
+  "en revanche": {
+    emoji: "🔄",
+    parts: "*la revanche* = revenge / rematch: the other side gets its turn.",
+    bridge: "English **revenge**, and *la revanche* in sport is the return match.",
+    examples: [["Le loyer est cher. En revanche, le quartier est calme.", "The rent is high. On the other hand, the area is quiet."]],
+    confuse: "*par contre* means the same and is more casual.",
+  },
+  "au fur et à mesure": {
+    emoji: "🪜",
+    parts: "*fur* is an old word for “rate, proportion” (from Latin *forum*, market). *à mesure* = in measure. So: in proportion as you go.",
+    examples: [["Je range au fur et à mesure.", "I tidy up as I go."], ["Au fur et à mesure que le temps passe…", "As time goes by…"]],
+  },
+  "poser un lapin": {
+    emoji: "🐇",
+    parts: "19th-century slang: *un lapin* was a promise not kept, such as leaving without paying.",
+    hook: "You wait at the café… and all that turns up is a rabbit.",
+    phrases: ["il m'a posé un lapin hier soir", "se faire poser un lapin"],
+  },
+  "empêcher": {
+    emoji: "⛓️",
+    parts: "Latin *impedicare*: to shackle someone's feet (*pedica*, a fetter).",
+    bridge: "Same root as English **impede** and **impeach**.",
+    phrases: ["empêcher quelqu'un de faire quelque chose", "le bruit m'empêche de dormir", "n'empêche que… — even so…"],
+  },
+  "emprunter": {
+    emoji: "📥",
+    hook: "*em-* = in: something comes **in** to you → borrow. *prêter* has *prêt* (ready): you have it ready to give **out** → lend.",
+    phrases: ["emprunter quelque chose à quelqu'un", "faire un emprunt — to take out a loan", "emprunter un chemin — to take a road"],
+    confuse: "*emprunter* (to borrow, in) ↔ *prêter* (to lend, out). « Je peux t'emprunter ton stylo ? » = « Tu peux me prêter ton stylo ? »",
+  },
+  "prêter": {
+    emoji: "📤",
+    hook: "*prêt* = ready: you have it ready to hand **out** → lend.",
+    family: ["*un prêt* — a loan", "*prêter attention à* — to pay attention to"],
+    confuse: "*prêter* (to lend, out) ↔ *emprunter* (to borrow, in). Never « prêter de quelqu'un ».",
+  },
+  "épuisé(e)": {
+    emoji: "🪣",
+    parts: "*é-* (out) + *puits* (a well) → *épuiser* = to draw a well until it is dry.",
+    family: ["*épuiser* — to exhaust", "*épuisant(e)* — exhausting", "*épuisé* also means sold out (*le livre est épuisé*)"],
+  },
+  "déçu(e)": {
+    emoji: "😞",
+    parts: "*décevoir* comes from Latin *decipere* — the same word as English **deceive**, but in French it drifted to “disappoint”.",
+    family: ["*décevoir* — to disappoint", "*la déception* — disappointment (NOT deception)", "*décevant(e)* — disappointing"],
+    confuse: "To deceive = *tromper*. *Déçu* = disappointed. False friend!",
+  },
+  "le chômage": {
+    emoji: "☀️💤",
+    parts: "From Greek *kauma* (burning heat) → *chômer*: to stop working during the hottest hours.",
+    family: ["*le chômeur / la chômeuse* — unemployed person", "*être au chômage* — to be unemployed", "*un jour chômé* — a day off (public holiday)"],
+    hook: "Too hot to work → no work → *chômage*.",
+  },
+  "le quai": {
+    emoji: "🚉",
+    bridge: "English **quay** (pronounced “key”): same word, from the harbour to the station.",
+    phrases: ["Le train part du quai 3", "les quais de la Seine"],
+  },
+
+  // — Quotidien —
+  "le logement": {
+    emoji: "🏠",
+    parts: "*loger* (to lodge) + *-ment* → where you are lodged.",
+    bridge: "English **lodge / lodging**: same word. *Le logement* = your lodging.",
+    family: ["*loger* — to house, to put up", "*se loger* — to find somewhere to live", "*la loge* — lodge, concierge's room"],
+    phrases: ["chercher un logement", "la crise du logement — the housing crisis", "un logement étudiant"],
+    confuse: "*l'hébergement* = a place to stay for a short time (hotel, trip); *le logement* = where you live.",
+  },
+  "le loyer": {
+    emoji: "🔑💶",
+    parts: "From Latin *locarium* (rent), from *locare* (to rent out), the same root as *louer* (to rent) → what you pay to *louer*.",
+    family: ["*louer* — to rent (out)", "*la location* — rental (NOT location)", "*le/la locataire* — tenant", "*le/la propriétaire* — landlord"],
+    hook: "*louer* → *le loyer*: the money you pay for what you *louez*.",
+    phrases: ["payer le loyer", "le loyer est de 900 € par mois", "charges comprises — bills included"],
+    confuse: "*le loyer* (rent) ≠ *la location* (the act of renting) ≠ *le lieu* (place).",
+  },
+  "le/la colocataire": {
+    emoji: "👯",
+    parts: "*co-* (together) + *locataire* (tenant, from *louer*, to rent) → co-tenant.",
+    family: ["*la colocation* — flat-sharing (*être en coloc*)", "*le/la coloc* — flatmate (casual)", "*le/la locataire* — tenant"],
+    hook: "co + **loc**ation: you share the rental.",
+    phrases: ["chercher un(e) colocataire", "vivre en colocation"],
+  },
+  "déménager": {
+    emoji: "📦🚚",
+    parts: "*dé-* (out) + *ménage* (household, from *maison*): taking your whole household out.",
+    family: ["*emménager* — to move in (*em-* = in)", "*le déménagement* — the move", "*le ménage* — housework (*faire le ménage*)"],
+    hook: "*DÉ-ménager* = move OUT, *EM-ménager* = move IN: the *ménage* (household) leaves or arrives.",
+    phrases: ["déménager à Lyon", "aider quelqu'un à déménager", "le jour du déménagement"],
+    confuse: "*bouger* = to move (a body, an object); *déménager* = to move house only.",
+  },
+  "faire les courses": {
+    emoji: "🛒",
+    parts: "*la course* = a run (*courir*, to run) → running around for errands.",
+    bridge: "English **courier**: someone who runs errands.",
+    phrases: ["faire les courses au supermarché", "la liste de courses — shopping list"],
+    confuse: "*faire les courses* = food / everyday shopping; *faire du shopping* = clothes, for fun; *une course* alone = a race (or a taxi ride).",
+  },
+  "le quartier": {
+    emoji: "🏘️",
+    parts: "*quart* (a quarter) → a quarter of a town.",
+    bridge: "English **quarter**, as in *le Quartier latin* = the Latin Quarter in Paris.",
+    phrases: ["un quartier calme / animé", "les gens du quartier — the locals", "le quartier général — headquarters"],
+  },
+  "les tâches ménagères": {
+    emoji: "🧹",
+    parts: "*la tâche* = task (Latin *taxa*, the source of **task** and **tax**). *ménager* = of the household (*ménage*).",
+    hook: "The ^ on *tâche* is the roof of the house where the tasks happen.",
+    family: ["*faire le ménage* — to clean the house", "*la ménagère* — housewife (old-fashioned)"],
+    confuse: "*la tâche* (task) ≠ *la tache* (a stain, no accent) — though chores often involve removing *taches*!",
+  },
+  "ranger": {
+    emoji: "🗄️",
+    parts: "*le rang* (a row, a rank) → to put things in rows.",
+    bridge: "English **arrange** and **range** (a row of mountains).",
+    family: ["*le rangement* — storage, tidying", "*déranger* — to disturb (= mess up the rows!)", "*rangé(e)* — tidy"],
+    phrases: ["ranger sa chambre", "ranger ses affaires — to put your things away"],
+    confuse: "*ranger* ≠ English *ranger*. And its opposite *déranger* is the « ça vous dérange ? » of daily life.",
+  },
+  "la facture": {
+    emoji: "🧾",
+    parts: "From Latin *factura* (making, from *facere*): first the making of goods, then the paper listing what was made or delivered.",
+    bridge: "Same *facere* as **manufacture** and **fact**.",
+    phrases: ["payer / régler la facture", "la facture d'électricité", "envoyer une facture"],
+    confuse: "At a restaurant: *l'addition*. At a hotel: *la note*. For gas, phone, a plumber: *la facture*.",
+  },
+  "se dépêcher": {
+    emoji: "🏃💨",
+    parts: "Made as the opposite of *empêcher* (to hinder, to shackle): *dé-pêcher* = to unshackle → off you go, fast.",
+    bridge: "English **dispatch** comes from the same Old French word.",
+    family: ["*une dépêche* — a news dispatch", "*Dépêche-toi !* — Hurry up!"],
+    hook: "*empêcher* = feet tied; *se dépêcher* = feet untied → run!",
+    confuse: "*se dépêcher* (to hurry) ≠ *pêcher* (to fish) ≠ *pécher* (to sin).",
+  },
+  "le trajet": {
+    emoji: "🚇↔️",
+    parts: "Latin *trajectus* = crossed over (*trans* + *jacere*, to throw) → the line you travel from A to B.",
+    bridge: "English **trajectory**.",
+    phrases: ["le trajet domicile-travail — the commute", "faire le trajet en vélo", "le trajet dure une heure"],
+    confuse: "*le voyage* = a trip somewhere; *le trajet* = the journey itself, often a regular one.",
+  },
+  "les transports en commun": {
+    emoji: "🚌🚇",
+    parts: "*en commun* = in common, shared → transport that everyone shares.",
+    hook: "*commun* → **commune**, **community**: transport for the community.",
+    phrases: ["prendre les transports en commun", "un ticket de transports en commun"],
+  },
+
+  // — Travail —
+  "reporter": {
+    emoji: "📅➡️",
+    parts: "*re-* (back) + *porter* (to carry) → to carry a date back to later.",
+    phrases: ["reporter une réunion à jeudi", "le match est reporté — the match is postponed"],
+    confuse: "*un reporter* (noun) = a journalist, borrowed from English. *reporter* (verb) = postpone. To report = *signaler* / *rapporter*.",
+  },
+  "le stage": {
+    emoji: "🎓💼",
+    parts: "Old French *estage* meant a stay, a period of residence → a period spent working inside a company.",
+    family: ["*le/la stagiaire* — intern, trainee", "*faire un stage* — to do an internship", "*un stage de formation* — a training course"],
+    confuse: "Theatre stage = *la scène*; a step / phase = *une étape*. *Le stage* is only an internship or a course.",
+  },
+  "démissionner": {
+    emoji: "🚪🚶",
+    parts: "*la démission* comes from Latin *demittere* (to let go); it shares the *mittere* (to send) family with **dismiss** and **mission**.",
+    hook: "*dé-mission-ner*: you give your **mission** back.",
+    family: ["*la démission* — resignation", "*donner sa démission* — to hand in your notice"],
+    confuse: "You leave of your own accord: *je démissionne*. If the boss sends you away: *être licencié(e)* (formal) or *se faire virer* (informal).",
+  },
+  "le congé": {
+    emoji: "🏖️",
+    parts: "From Latin *commeatus* (permission to go) → leave from work.",
+    bridge: "English **to take one's leave**: *prendre congé de quelqu'un* = to say goodbye.",
+    phrases: ["être en congé", "les congés payés — paid holidays", "un congé maternité / paternité", "un congé maladie — sick leave"],
+    confuse: "*les vacances* = holidays in general; *le congé* = official time off from work.",
+  },
+  "réussir un examen": {
+    emoji: "✅📝",
+    parts: "*réussir* comes from Italian *riuscire*: *ri-* + *uscire* (to go out) → to come out well.",
+    hook: "You walk **out** (*uscire*) of the exam room a winner.",
+    family: ["*la réussite* — success", "*réussir à faire* — to manage to do"],
+    confuse: "*passer un examen* = to TAKE an exam (false friend!). To pass it = *réussir*. To fail = *rater* / *échouer à*.",
+  },
+  "la formation": {
+    emoji: "🧑‍🏫",
+    parts: "*former* (to shape) → shaping someone's skills.",
+    family: ["*former* — to train", "*le formateur / la formatrice* — trainer", "*la formation continue* — continuing education"],
+    phrases: ["suivre une formation", "une formation en informatique", "Quelle est votre formation ? — What's your educational background?"],
+    confuse: "English *formation* (shape, line-up) is much narrower. *L'éducation* = upbringing; *les études* = studies.",
+  },
+
+  // — Voyage —
+  "un aller-retour": {
+    emoji: "⇄",
+    parts: "*aller* (to go) + *retour* (return) → a go-and-return ticket.",
+    bridge: "British English says a **return** ticket = *retour*.",
+    phrases: ["un aller-retour Paris-Lyon", "faire l'aller-retour dans la journée — to go there and back in a day"],
+    confuse: "*un aller simple* = one-way. *Le retour* alone = the trip back.",
+  },
+  "un aller simple": {
+    emoji: "→",
+    parts: "*aller* (to go) + *simple* (single) → only the going.",
+    bridge: "British English **single** ticket ≈ *simple*.",
+    hook: "*simple*: just one arrow →, no way back.",
+    confuse: "*un aller-retour* = return ticket (⇄).",
+  },
+  "l'hébergement": {
+    emoji: "🏨",
+    parts: "*héberger* comes from a Germanic word for an army's shelter for the night.",
+    bridge: "The same Germanic word gave English **harbour** (a shelter for ships).",
+    family: ["*héberger* — to put up, to host", "*l'hébergement web* — web hosting", "*être hébergé(e) chez des amis* — to stay with friends"],
+    confuse: "*l'hébergement* = somewhere to stay (hotel, camping, Airbnb); *le logement* = where you live.",
+  },
+  "le vol": {
+    emoji: "✈️🦹",
+    parts: "*voler* = to fly AND to steal. The thief sense probably comes from falconry, where the falcon \"flies\" (snatches) its prey.",
+    family: ["*voler* — to fly / to steal", "*le vol* — flight / theft", "*le voleur* — thief", "*s'envoler* — to fly away"],
+    hook: "A thief steals your bag and it *s'envole* — flies away.",
+    phrases: ["un vol direct", "le vol est annulé", "Au voleur ! — Stop, thief!"],
+  },
+  "rater": {
+    emoji: "🐀💨",
+    parts: "Origin uncertain. It first described a gun that failed to fire; one theory is that a *rat* had eaten the powder. Treat that as a story, not a fact.",
+    hook: "A rat ran off with your ticket → you *ratez* the train.",
+    family: ["*c'est raté* — it's a failure", "*un raté* — a misfire; a failure (person)"],
+    phrases: ["rater le train / le bus", "rater un examen — to fail an exam", "rater une occasion — to miss an opportunity"],
+    confuse: "*manquer le train* means the same (a bit more formal). But for missing a person, only *manquer*: *tu me manques*.",
+  },
+};

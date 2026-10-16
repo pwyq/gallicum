@@ -158,6 +158,7 @@ input.wrong { border-color: var(--wrong); background: var(--wrong-soft); }
 
 .tag { display: inline-block; font-size: .75rem; padding: .1rem .55rem; border-radius: 99px; background: var(--primary-soft); color: var(--primary); }
 .tag.new { background: var(--accent-soft); color: var(--accent); }
+.tag.hard { background: var(--wrong-soft); color: var(--wrong); }
 .chip { display: inline-block; padding: .1rem .55rem; margin: .1rem 0; border-radius: 99px; background: var(--bg); border: 1px solid var(--border); font-size: .88rem; }
 .notice { background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 9px; padding: .7rem 1rem; margin-bottom: 1rem; }
 
@@ -183,6 +184,20 @@ input.wrong { border-color: var(--wrong); background: var(--wrong-soft); }
 .grade.good { color: var(--ok); }
 .grade.easy { color: var(--primary); }
 .grade.suggest { outline: 2px solid currentColor; outline-offset: 1px; }
+
+/* Memory aids & hard words */
+.aid { margin: 1rem 0 .4rem; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 9px; background: var(--accent-soft); padding: .6rem .9rem; }
+.aid summary { cursor: pointer; font-weight: 600; }
+.aid dl { margin: .6rem 0 0; display: grid; grid-template-columns: max-content 1fr; gap: .45rem 1rem; }
+.aid dt { color: var(--muted); font-size: .85rem; padding-top: .1rem; }
+.aid dd { margin: 0; }
+.aid ul { margin: 0; padding-left: 1.1rem; }
+@media (max-width: 560px) { .aid dl { grid-template-columns: 1fr; gap: .1rem; } .aid dd { margin-bottom: .45rem; } }
+.flag-btn { font-size: .8rem; padding: .25rem .7rem; margin-top: .6rem; color: var(--muted); }
+.flag-btn.on { color: var(--wrong); border-color: var(--wrong); }
+.hard-list { margin: .4rem 0 .8rem; padding-left: 1.2rem; max-height: 320px; overflow: auto; }
+.hard-list li { margin: .15rem 0; }
+.hard-out { width: 100%; font-family: ui-monospace, Consolas, monospace; font-size: .8rem; }
 @media (max-width: 520px) { .grades { grid-template-columns: repeat(2, 1fr); } }
 
 .question { font-size: 1.3rem; margin: .3rem 0 1.2rem; }

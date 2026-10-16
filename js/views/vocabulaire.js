@@ -1,6 +1,6 @@
 // Flashcards with spaced repetition. Two modes: recognise (FR → EN) and produce (EN → FR, typed).
 (function () {
-  const { $, esc, dayNum, today, speak, check, review, save, bump, accentBar } = FB;
+  const { $, esc, dayNum, today, speak, check, review, save, bump, accentBar, isHard, aidFor } = FB;
   let state;
   const GRADES = [["À revoir", "again"], ["Difficile", "hard"], ["Bien", "good"], ["Facile", "easy"]];
 
@@ -17,6 +17,26 @@
       }
     }
     return [...out];
+  }
+
+  // Memory-aid text may use *mot* (italics) and **word** (bold); everything else is escaped.
+  const fmt = (s) => esc(s).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/\*([^*]+)\*/g, "<i>$1</i>");
+  function aidHtml(aid, open) {
+    const list = (items) => `<ul>${items.map((x) => `<li>${fmt(x)}</li>`).join("")}</ul>`;
+    const rows = [
+      ["Décomposer", aid.parts && fmt(aid.parts)],
+      ["Lien avec l'anglais", aid.bridge && fmt(aid.bridge)],
+      ["Famille", aid.family?.length && list(aid.family)],
+      ["Moyen mnémotechnique", aid.hook && fmt(aid.hook)],
+      ["Expressions", aid.phrases?.length && list(aid.phrases)],
+      ["Autres exemples", aid.examples?.length && `<ul>${aid.examples.map(([fr, en]) => `<li>« ${fmt(fr)} » <span class="muted">${esc(en)}</span></li>`).join("")}</ul>`],
+      ["À ne pas confondre", aid.confuse && fmt(aid.confuse)],
+    ].filter(([, v]) => v);
+    return `
+      <details class="aid" id="aid" ${open ? "open" : ""}>
+        <summary>${aid.emoji ? esc(aid.emoji) + " " : "🧠 "}Aide-mémoire</summary>
+        <dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>
+      </details>`;
   }
 
   const label = (n) => (n <= 0 ? "maint." : n === 1 ? "1 j" : n < 30 ? `${n} j` : n < 365 ? `${Math.round(n / 30)} mois` : `${(n / 365).toFixed(1)} an`);
@@ -36,6 +56,13 @@
     let mode = sessionStorage.getItem("vocab-mode") || "recognize";
     let theme = sessionStorage.getItem("vocab-theme") || "all";
     const themes = [...new Set(FB.allWords().map((w) => w.theme))];
+
+    function hardLine() {
+      const hard = FB.hardWords();
+      if (!hard.length) return "";
+      const missing = hard.filter((w) => !aidFor(w)).length;
+      return `<p class="small">🧠 <b>${hard.length}</b> mot${hard.length > 1 ? "s" : ""} difficile${hard.length > 1 ? "s" : ""}${missing ? ` · ${missing} sans aide-mémoire — <a href="#/reglages">exporter la liste</a>` : ""}</p>`;
+    }
 
     function lobby() {
       App.onKey = null;
@@ -61,6 +88,7 @@
           ${due.length + fresh.length
             ? `<button class="btn primary" id="start">Commencer</button>`
             : `<p class="muted">Tout est à jour pour aujourd'hui 🎉 Revenez demain, ou augmentez le nombre de nouvelles cartes dans les Réglages.</p>`}
+          ${hardLine()}
           <p class="muted small">Astuce : le mode « Produire » est plus difficile mais bien plus efficace pour parler. Alternez !</p>
         </section>`;
       $("#mode").onchange = (e) => { mode = e.target.value; sessionStorage.setItem("vocab-mode", mode); };
@@ -91,12 +119,14 @@
         const w = queue[0];
         const card = state.cards[w.id];
         const isNew = !card;
+        const aid = aidFor(w);
+        let aidShown = false;
         const previews = [0, 1, 2, 3].map((g) => label(review(card, g).interval));
 
         root.innerHTML = `
           <div class="progress"><div style="width:${Math.round((done / (total + again || 1)) * 100)}%"></div></div>
           <section class="card flash">
-            <div class="meta">${isNew ? '<span class="tag new">nouveau</span>' : ""}<span class="tag">${esc(w.theme)}</span><span class="muted small">${queue.length} restante${queue.length > 1 ? "s" : ""}</span></div>
+            <div class="meta">${isNew ? '<span class="tag new">nouveau</span>' : ""}${isHard(w.id) ? '<span class="tag hard">🧠 difficile</span>' : ""}<span class="tag">${esc(w.theme)}</span><span class="muted small">${queue.length} restante${queue.length > 1 ? "s" : ""}</span></div>
             <div id="front"></div>
             <div id="back" hidden></div>
             <div id="actions"></div>
@@ -106,7 +136,9 @@
         const backHtml = `
           <div class="answer"><b>${esc(w.fr)}</b> <button class="icon" id="say">🔊</button></div>
           ${w.back ? `<div class="rich">${w.back}</div>` : `<div class="en">${esc(w.en)}</div>`}
-          ${w.ex ? `<p class="example">« ${esc(w.ex)} » <button class="icon" id="say-ex">🔊</button></p>` : ""}`;
+          ${w.ex ? `<p class="example">« ${esc(w.ex)} » <button class="icon" id="say-ex">🔊</button></p>` : ""}
+          <div id="aid-slot"></div>
+          <button class="btn flag-btn" id="flag"></button>`;
 
         const gradeButtons = (suggest) => `
           <div class="grades">${GRADES.map(([t, cls], g) => `
@@ -119,11 +151,34 @@
           actions.innerHTML = gradeButtons(suggest);
           $("#say").onclick = () => speak(w.fr);
           if ($("#say-ex")) $("#say-ex").onclick = () => speak(w.ex);
+          // Aids open by themselves after a miss or on a hard word; otherwise they stay folded.
+          if (suggest === 0 || isHard(w.id)) showAid();
+          else if (aid) $("#aid-slot").innerHTML = aidHtml(aid, false);
+          renderFlag();
           actions.querySelectorAll("[data-g]").forEach((b) => (b.onclick = () => grade(+b.dataset.g)));
           App.onKey = (e) => {
             if (e.target.tagName === "INPUT" && e.key !== "Enter") return;
             if (["1", "2", "3", "4"].includes(e.key)) grade(+e.key - 1);
             else if (e.key === "Enter" && suggest != null) { e.preventDefault(); grade(suggest); }
+          };
+        }
+
+        function showAid() {
+          aidShown = true;
+          $("#aid-slot").innerHTML = aid
+            ? aidHtml(aid, true)
+            : (isHard(w.id) ? `<p class="muted small">🧠 Pas encore d'aide-mémoire pour ce mot — <a href="#/reglages">exportez la liste des mots difficiles</a>.</p>` : "");
+        }
+
+        function renderFlag() {
+          const btn = $("#flag");
+          const flagged = !!state.flagged[w.id];
+          btn.textContent = flagged ? "🧠 Marqué difficile ✓" : "🧠 Marquer comme difficile";
+          btn.classList.toggle("on", flagged);
+          btn.onclick = () => {
+            if (flagged) delete state.flagged[w.id]; else state.flagged[w.id] = true;
+            save();
+            renderFlag();
           };
         }
 
@@ -135,6 +190,14 @@
           queue.shift();
           if (g === 0) { queue.push(w); again++; } else done++;
           save();
+          // A miss on a word with an aid: show the aid before moving on, so it gets read at the right moment.
+          if (g === 0 && aid && !aidShown) {
+            showAid();
+            actions.innerHTML = `<button class="btn primary wide" id="cont">Continuer <small>Entrée</small></button>`;
+            $("#cont").onclick = next;
+            App.onKey = (e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); next(); } };
+            return;
+          }
           next();
         }
 
